@@ -36,7 +36,6 @@ wheels/
 logs/
 
 # Project specific
-data/
 output/
 results/
 temp/

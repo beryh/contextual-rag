@@ -1,0 +1,10 @@
+{"id": "Complex1", "question": "How do temperature, Top K, and Top P parameters interact in Amazon Bedrock's foundation models, and how might adjusting these affect the output when generating text about different types of equines?"}
+{"id": "Complex2", "question": "How does the system handle a scenario where a transaction status changes from 'Pending' to 'Paid', and what functions would be involved in updating and retrieving this information?"}
+{"id": "Complex3", "question": "How can a developer create a new prompt version, retrieve its information, and incorporate it into a prompt flow using Amazon Bedrock's Python SDK?"}
+{"id": "Complex4", "question": "How does the lambda_handler function handle different types of responses from the LLM, and what are the potential outcomes of its parsing process?"}
+{"id": "Complex5", "question": "How can an administrator troubleshoot a failed data source sync event and optimize future sync operations in Amazon Bedrock, considering both console and API methods?"}
+{"id": "Simple1", "question": "How long will Amazon Bedrock support base models after launch in a region?"}
+{"id": "Simple2", "question": "What is the purpose of an S3 retrieval node in a prompt flow?"}
+{"id": "Simple3", "question": "What metric is used to evaluate toxicity in general text generation tasks?"}
+{"id": "Simple4", "question": "How can users download third-party audit reports for AWS services?"}
+{"id": "Simple5", "question": "How do you enable Prompt flows and Prompt management in Bedrock Studio?"}
