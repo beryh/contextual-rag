@@ -1,18 +1,18 @@
 import json
 import logging
 from datetime import datetime
-from time import time
+import time
 from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
 
 import boto3
-import requests
 import botocore.config
 from requests_aws4auth import AWS4Auth
 from opensearchpy import OpenSearch, RequestsHttpConnection
 
 import os
 from dotenv import load_dotenv
+import requests
 
 from question import QuestionLoader
 from config import Config
@@ -280,7 +280,8 @@ class RAGService:
 
         if use_hybrid:
             search_result_knn = self._search_by_knn(embedded_question, index_name, top_n=40)
-            search_result_bm25 = self._search_by_bm25(question, index_name, top_n=40)        
+            search_result_bm25 = self._search_by_bm25(question, index_name, top_n=40)
+
             search_result = self._rank_fusion(question, search_result_knn, search_result_bm25)
         else:
             search_result = self._search_by_knn(embedded_question, index_name, top_n=20)
@@ -295,6 +296,7 @@ class RAGService:
             'content': [{'text': f"{question}\n\nAdditional Information:\n{additional_info}"}]
         }]
 
+        processing_time = (datetime.now() - start_dt).microseconds // 1_000
         # try:
         for attempt in range(10):
             try:
@@ -309,16 +311,10 @@ class RAGService:
                     }
                 )
                 break
-            except botocore.errorfactory.ThrottlingException as e:
-                print(f"({attempt}) An error occurred during answer generation: {e}")
-                time.sleep(10)
             except Exception as e:
                 print(f"Some Exception occurred: {e}")
                 break
 
-        # get elapsed time
-        elapsed_time = str((datetime.now() - start_dt).total_seconds())
-        
         result = {
             'timestamp': start_dt.isoformat(),
             'question': question,
@@ -326,7 +322,7 @@ class RAGService:
             # 'retrieved_contexts': [ctx['content'] for ctx in search_result],
             'usage': response['usage'],
             'latency': response['metrics']['latencyMs'],
-            'elapsed_time': elapsed_time
+            'elapsed_time': processing_time + response['metrics']['latencyMs']
         }
         print(result)
 
@@ -360,7 +356,7 @@ class ResultProcessor:
                             "total": {"N": str(result['usage']['totalTokens'])}
                         }
                     },
-                    'elapsedTime': {'S': result['elapsed_time']}
+                    'elapsedTime': {'S': str(result['elapsed_time'])}
                 }
             )
         except Exception as e:
