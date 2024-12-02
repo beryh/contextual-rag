@@ -12,8 +12,6 @@ from libs.dynamodb_writer import DynamoDBWriter
 
 from libs.contextual_rag_service import ContextualRAGService
 
-load_dotenv()
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
  

@@ -11,11 +11,30 @@ class DynamoDBWriter:
             region_name=aws_region, 
             profile_name=aws_profile
         ).client('dynamodb')
+        self._create_table_if_not_exists(self.table_name)
 
     def save_result(self, contextual: bool, hybrid: bool, question: str, result: Dict) -> None:
         item = self._build_item(contextual, hybrid, question, result)
         self._put_item(item)
         logger.info(f"Saved result for question {question}")
+
+    def _create_table_if_not_exists(self, table_name: str):
+        if table_name not in self.dynamodb.list_tables()['TableNames']:
+            self.dynamodb.create_table(
+                TableName=table_name,
+                AttributeDefinitions=[
+                    {'AttributeName': 'question_id', 'AttributeType': 'S'},
+                    {'AttributeName': 'timestamp', 'AttributeType': 'S'}
+                ],
+                KeySchema=[
+                    {'AttributeName': 'question_id', 'KeyType': 'HASH'},
+                    {'AttributeName': 'timestamp', 'KeyType': 'RANGE'}
+                ],
+                ProvisionedThroughput={
+                    'ReadCapacityUnits': 10,
+                    'WriteCapacityUnits': 10
+                }
+            )
 
     def _put_item(self, item: Dict) -> None:
         try:
@@ -42,4 +61,4 @@ class DynamoDBWriter:
                 }
             },
             'elapsedTime': {'S': str(result['elapsed_time'])}
-        }    
+        }
