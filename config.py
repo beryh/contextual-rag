@@ -37,7 +37,9 @@ class Config:
 
     @dataclass
     class RerankerConfig:
-        api_url: str = os.getenv('RERANK_API_URL')
+        reranker_model_id: str = os.getenv('RERANKER_MODEL_ID')
+        aws_region: str = os.getenv('RERANKER_AWS_REGION', 'us-west-2')
+        aws_profile: str = os.getenv('RERANKER_AWS_PROFILE', 'default')
 
     @dataclass
     class RankFusionConfig:

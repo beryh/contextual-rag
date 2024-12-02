@@ -26,7 +26,7 @@ class ContextualRAGService:
         if use_hybrid:
             knn_results = self.opensearch_service.search_by_knn(embedding, index_name, search_limit)
             bm25_results = self.opensearch_service.search_by_bm25(question, index_name, search_limit)
-            search_results = self.reranker_service.rank_fusion(question, knn_results, bm25_results, final_reranked_results=search_limit // 2)
+            search_results = self.reranker_service.rank_fusion(question, knn_results, bm25_results, final_reranked_results=search_limit)
         else:
             search_results = self.opensearch_service.search_by_knn(embedding, index_name, search_limit)
 

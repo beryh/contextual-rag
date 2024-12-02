@@ -1,12 +1,26 @@
 import requests
 import logging
-
+import boto3
+import botocore
 logger = logging.getLogger(__name__)
 
 class RerankerService:
-    def __init__(self, reranker_api_url: str):
-        self.rerank_api_url = reranker_api_url
- 
+    def __init__(self, aws_region: str, aws_profile: str, reranker_model_id: str, retries: int):
+        self.aws_region = aws_region
+        self.aws_profile = aws_profile
+        self.reranker_model_id = reranker_model_id
+        self.retries = retries
+        self.reranker_client = self._init_reranker_client(aws_region, aws_profile, retries)
+
+    def _init_reranker_client(self, aws_region: str, aws_profile: str, retries: int):
+        retry_config = botocore.config.Config(
+            retries={"max_attempts": retries, "mode": "standard"}
+        )
+        return boto3.Session(
+            region_name=aws_region,
+            profile_name=aws_profile
+        ).client("bedrock-agent-runtime", config=retry_config)
+        
     def rank_fusion(self, question, knn_results, bm25_results, hybrid_score_filter=40, final_reranked_results=20, knn_weight=0.6):
         bm25_weight = 1 - knn_weight
 
@@ -85,24 +99,48 @@ class RerankerService:
         return final_results
     
     def _rerank_documents(self, question, documents, top_k=20):
-        payload = {
-            "documents": documents,
-            "query": question,
-            "rank_fields": ["content"],
-            "top_n": top_k
+        text_sources = []
+        for doc in documents:
+            text_sources.append({
+                "type": "INLINE",
+                "inlineDocumentSource": {
+                    "type": "TEXT",
+                    "textDocument": {
+                        "text": doc['content'],
+                    }
+                }
+            })
+        
+        model_package_arn = f"arn:aws:bedrock:{self.aws_region}::foundation-model/{self.reranker_model_id}"
+        response = self.reranker_client.rerank(
+        queries=[
+            {
+                    "type": "TEXT",
+                    "textQuery": {
+                        "text": question
+                    }
+                }
+            ],
+            sources=text_sources,
+            rerankingConfiguration={
+                "type": "BEDROCK_RERANKING_MODEL",
+                "bedrockRerankingConfiguration": {
+                    "numberOfResults": top_k,
+                    "modelConfiguration": {
+                        "modelArn": model_package_arn,
+                    }
+                }
+            }
+        )
+
+        results = {
+            "results": [
+                {
+                    "index": result['index'],
+                    "relevance_score": result['relevanceScore']
+                } for result in response['results']
+            ]
         }
+        return results
 
-        headers = {
-            "Content-Type": "application/json"
-        }
-
-        response = requests.post(self.rerank_api_url, json=payload, headers=headers)
-
-        if response.status_code == 200:
-            result = response.json()
-            return result 
-        else:
-            logger.error(f"Error: API failed (status code: {response.status_code})")
-            logger.error(f"response: {response.text}")
-            return None
     

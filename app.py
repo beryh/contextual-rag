@@ -24,7 +24,7 @@ def main():
     # Initialize services
     bedrock_service = BedrockService(config.aws.region, config.aws.profile, config.bedrock.retries, config.bedrock.embed_model_id, config.bedrock.model_id, config.model.max_tokens, config.model.temperature, config.model.top_p)
     opensearch_service = OpensearchService(config.aws.region, config.aws.profile, config.opensearch.prefix, config.opensearch.domain_name, config.opensearch.document_name, config.opensearch.user, config.opensearch.password)
-    reranker_service = RerankerService(config.reranker.api_url)
+    reranker_service = RerankerService(config.reranker.aws_region, config.reranker.aws_profile, config.reranker.reranker_model_id, config.bedrock.retries)
     
     rag_service = ContextualRAGService(bedrock_service, opensearch_service, reranker_service)
     ddb_writer = DynamoDBWriter(config.aws.region, config.aws.profile, config.dynamodb.table_name)
