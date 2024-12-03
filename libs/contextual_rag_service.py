@@ -13,7 +13,7 @@ class ContextualRAGService:
         self.opensearch_service = opensearch_service
         self.reranker_service = reranker_service
     
-    def do(self, question: str, document_name: str, chunk_size: int, use_hybrid: bool, use_contextual: bool, search_limit: int):
+    def do(self, question: str, document_name: str, chunk_size: str, use_hybrid: bool, use_contextual: bool, search_limit: int):
         # get timestamp
         start_dt = datetime.now()
 
@@ -50,7 +50,7 @@ class ContextualRAGService:
         result = {
             'timestamp': start_dt.isoformat(),
             'question': question,
-            # 'answer': response['output']['message']['content'][0]['text'],
+            'answer': response['output']['message']['content'][0]['text'],
             # 'retrieved_contexts': [ctx['content'] for ctx in search_result],
             'usage': response['usage'],
             'latency': response['metrics']['latencyMs'],

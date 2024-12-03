@@ -50,8 +50,8 @@ class Config:
 
     @dataclass
     class AppConfig:
-        chunk_size: int = int(os.getenv('CHUNK_SIZE', 1000))
-        rate_limit_delay: int = int(os.getenv('RATE_LIMIT_DELAY', 60))
+        chunk_size: str = os.getenv('CHUNK_SIZE', 'manual')
+        rate_limit_delay: str = int(os.getenv('RATE_LIMIT_DELAY', 60))
 
     def __init__(self):        
         self.aws = self.AWSConfig()

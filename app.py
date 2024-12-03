@@ -45,7 +45,7 @@ def main():
                     result = rag_service.do(
                         question=question.question,
                         document_name=config.opensearch.document_name,
-                        chunk_size=1000,
+                        chunk_size=config.app.chunk_size,
                         use_hybrid=hybrid,
                         use_contextual=contextual,
                         search_limit=40
