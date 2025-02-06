@@ -26,10 +26,10 @@ class BedrockService:
         )
         return json.loads(response['body'].read())['embedding']
     
-    def converse(self, messages: List[Dict], system_prompt: str, max_tokens: None=None, temperature: None=None, top_p: None=None) -> Dict:
+    def converse(self, messages: List[Dict], system_prompt: str, model_id: None=None, max_tokens: None=None, temperature: None=None, top_p: None=None) -> Dict:
         try:
             return self.bedrock_client.converse(
-                modelId=self.model_id,
+                modelId=model_id if model_id else self.model_id,
                 messages=messages,
                 system=[{'text': system_prompt}],
                 inferenceConfig={
@@ -40,6 +40,26 @@ class BedrockService:
             )
         except Exception as e:
             logger.error(f"Error in converse: {e}")
+            raise
+    
+    def converse_with_tools(self, messages: List[Dict], system_prompt: str, tools: List[Dict], model_id: None=None, max_tokens: None=None, temperature: None=None, top_p: None=None, top_k: None = None) -> Dict:
+        try:
+            return self.bedrock_client.converse(
+                modelId=model_id if model_id else self.model_id,
+                messages=messages,
+                system=[{'text': system_prompt}],
+                toolConfig=tools,
+                inferenceConfig={
+                    'maxTokens': max_tokens if max_tokens else self.max_tokens,
+                    'temperature': temperature if temperature else self.temperature,
+                    'topP': top_p if top_p else self.top_p
+                },
+                additionalModelRequestFields={
+                    'topK': top_k if top_k else None
+                }
+            )
+        except Exception as e:
+            logger.error(f"Error in converse_with_tools: {e}")
             raise
         
     def _init_bedrock_client(self, aws_region: str, aws_profile: str, retries: int):

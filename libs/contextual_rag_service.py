@@ -12,13 +12,10 @@ class ContextualRAGService:
         self.bedrock_service = bedrock_service
         self.opensearch_service = opensearch_service
         self.reranker_service = reranker_service
-    
-    def do(self, question: str, document_name: str, chunk_size: str, use_hybrid: bool, use_contextual: bool, search_limit: int):
+
+    def do(self, question: str, index_name: str, use_hybrid: bool, search_limit: int):
         # get timestamp
         start_dt = datetime.now()
-
-        # build actual index name
-        index_name = f"{'contextual_' if use_contextual else ''}{document_name}_{chunk_size}"
 
         # search
         embedding = self.bedrock_service.embedding(question)
@@ -51,10 +48,17 @@ class ContextualRAGService:
             'timestamp': start_dt.isoformat(),
             'question': question,
             'answer': response['output']['message']['content'][0]['text'],
-            # 'retrieved_contexts': [ctx['content'] for ctx in search_result],
+            'retrieved_contexts': response['output']['message']['content'],
             'usage': response['usage'],
             'latency': response['metrics']['latencyMs'],
             'elapsed_time': processing_time + response['metrics']['latencyMs']
         }
 
         return result
+    
+    def do(self, question: str, document_name: str, chunk_size: str, use_hybrid: bool, use_contextual: bool, search_limit: int):
+        # build actual index name
+        index_name = f"{'contextual_' if use_contextual else ''}{document_name}_{chunk_size}"
+
+        return self.do(question=question, index_name=index_name, use_hybrid=use_hybrid, search_limit=search_limit)
+

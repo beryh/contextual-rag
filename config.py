@@ -8,7 +8,7 @@ load_dotenv(override=True)
 class Config:
     @dataclass
     class AWSConfig:
-        region: str = os.getenv('AWS_REGION', 'ap-northeast-2')
+        region: str = os.getenv('AWS_REGION', 'us-west-2')
         profile: str = os.getenv('AWS_PROFILE', 'default')
 
     @dataclass
@@ -39,7 +39,7 @@ class Config:
     class RerankerConfig:
         reranker_model_id: str = os.getenv('RERANKER_MODEL_ID')
         aws_region: str = os.getenv('RERANKER_AWS_REGION', 'us-west-2')
-        aws_profile: str = os.getenv('RERANKER_AWS_PROFILE', 'default')
+        aws_profile: str = os.getenv('RERANKER_AWS_PROFILE', 'ml')
 
     @dataclass
     class RankFusionConfig:
@@ -50,7 +50,7 @@ class Config:
 
     @dataclass
     class AppConfig:
-        chunk_size: str = os.getenv('CHUNK_SIZE', 'manual')
+        chunk_size: str = os.getenv('CHUNK_SIZE', '1000')
         rate_limit_delay: str = int(os.getenv('RATE_LIMIT_DELAY', 60))
 
     def __init__(self):        
